@@ -4,10 +4,16 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+
+	"github.com/zbsss/glox/pkg/scanner"
 )
 
 func run(source string) {
-	fmt.Println(source)
+	sc := scanner.NewScanner(source)
+
+	tokens := sc.ScanTokens()
+
+	fmt.Println(tokens)
 }
 
 func runFile(path string) {
