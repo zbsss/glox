@@ -5,16 +5,9 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/zbsss/glox/pkg/scanner"
+	"github.com/zbsss/glox/errors.go"
+	"github.com/zbsss/glox/scanner"
 )
-
-func run(source string) {
-	sc := scanner.NewScanner(source)
-
-	tokens := sc.ScanTokens()
-
-	fmt.Println(tokens)
-}
 
 func runFile(path string) {
 	bytes, err := ioutil.ReadFile(path)
@@ -25,6 +18,10 @@ func runFile(path string) {
 	}
 
 	run(string(bytes))
+
+	if errors.HadError {
+		os.Exit(65)
+	}
 }
 
 func runPrompt() {
@@ -35,7 +32,20 @@ func runPrompt() {
 	for {
 		fmt.Print("> ")
 		fmt.Scanln(&input)
+
 		run(input)
+
+		errors.HadError = false
+	}
+}
+
+func run(source string) {
+	sc := scanner.NewScanner(source)
+
+	tokens := sc.ScanTokens()
+
+	for _, token := range tokens {
+		fmt.Println(token)
 	}
 }
 
