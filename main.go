@@ -1,11 +1,12 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
 
-	"github.com/zbsss/glox/errors.go"
+	"github.com/zbsss/glox/errors"
 	"github.com/zbsss/glox/scanner"
 )
 
@@ -50,11 +51,11 @@ func run(source string) {
 }
 
 func main() {
-	if len(os.Args) > 2 {
-		fmt.Println("Usage: glox [script]")
-		os.Exit(64)
-	} else if len(os.Args) == 2 {
-		runFile(os.Args[1])
+	file := flag.String("f", "", "script file to execute")
+	flag.Parse()
+
+	if *file != "" {
+		runFile(*file)
 	} else {
 		runPrompt()
 	}

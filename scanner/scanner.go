@@ -3,7 +3,7 @@ package scanner
 import (
 	"fmt"
 
-	"github.com/zbsss/glox/errors.go"
+	"github.com/zbsss/glox/errors"
 	"github.com/zbsss/glox/tokens"
 )
 
@@ -64,16 +64,55 @@ func (s *Scanner) scanToken() {
 	case '*':
 		s.addToken(tokens.STAR, nil)
 	case '!':
-		s.addToken(tokens.BANG, nil)
+		if s.match('=') {
+			s.addToken(tokens.BANG_EQUAL, nil)
+		} else {
+			s.addToken(tokens.BANG, nil)
+		}
 	case '=':
-		s.addToken(tokens.EQUAL, nil)
+		if s.match('=') {
+			s.addToken(tokens.EQUAL_EQUAL, nil)
+		} else {
+			s.addToken(tokens.EQUAL, nil)
+		}
 	case '<':
-		s.addToken(tokens.LESS, nil)
+		if s.match('=') {
+			s.addToken(tokens.LESS_EQUAL, nil)
+		} else {
+			s.addToken(tokens.LESS, nil)
+		}
 	case '>':
-		s.addToken(tokens.GREATER, nil)
+		if s.match('=') {
+			s.addToken(tokens.GREATER_EQUAL, nil)
+		} else {
+			s.addToken(tokens.GREATER, nil)
+		}
+	case '/':
+		if s.match('/') {
+			for s.peek() != '\n' && !s.isAtEnd() {
+				s.advance()
+			}
+		} else {
+			s.addToken(tokens.SLASH, nil)
+		}
+	case ' ':
+	case '\t':
+	case '\r':
+		break
+	case '\n':
+		s.line++
 	default:
 		errors.Error(s.line, fmt.Sprintf("unexpected character: %c", char))
 	}
+}
+
+func (s *Scanner) match(expected rune) bool {
+	if s.isAtEnd() || rune(s.source[s.current]) != expected {
+		return false
+	}
+
+	s.current++
+	return true
 }
 
 func (s *Scanner) addToken(tokenType tokens.TokenType, literal interface{}) {
@@ -83,6 +122,14 @@ func (s *Scanner) addToken(tokenType tokens.TokenType, literal interface{}) {
 		Literal: literal,
 		Line:    s.line,
 	})
+}
+
+func (s *Scanner) peek() rune {
+	if s.isAtEnd() {
+		return '\000'
+	}
+
+	return rune(s.source[s.current])
 }
 
 func (s *Scanner) advance() rune {
